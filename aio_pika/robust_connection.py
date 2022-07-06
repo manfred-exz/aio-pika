@@ -1,5 +1,6 @@
 import asyncio
-from typing import Any, Type, Union
+from ssl import SSLContext
+from typing import Any, Type, Union, Optional
 from weakref import WeakSet
 
 import aiormq.abc
@@ -16,7 +17,6 @@ from .exceptions import CONNECTION_EXCEPTIONS
 from .log import get_logger
 from .robust_channel import RobustChannel
 from .tools import CallbackCollection, OneShotCallback
-
 
 log = get_logger(__name__)
 
@@ -177,6 +177,7 @@ async def connect_robust(
     ssl: bool = False,
     loop: asyncio.AbstractEventLoop = None,
     ssl_options: dict = None,
+    ssl_context: Optional[SSLContext] = None,
     timeout: TimeoutType = None,
     client_properties: FieldTable = None,
     connection_class: Type[AbstractRobustConnection] = RobustConnection,
@@ -220,12 +221,12 @@ async def connect_robust(
 
     .. code-block:: python
 
+        # As URL parameter method
         read_connection = await connect(
-            client_properties={
-                'connection_name': 'Read connection'
-            }
+            "amqp://guest:guest@localhost/?name=Read%20connection"
         )
 
+        # keyword method
         write_connection = await connect(
             client_properties={
                 'connection_name': 'Write connection'
@@ -253,6 +254,7 @@ async def connect_robust(
     :param timeout: connection timeout in seconds
     :param loop:
         Event loop (:func:`asyncio.get_event_loop()` when :class:`None`)
+    :param ssl_context: ssl.SSLContext instance
     :param connection_class: Factory of a new connection
     :param kwargs: addition parameters which will be passed to the connection.
     :return: :class:`aio_pika.connection.Connection`
@@ -276,7 +278,7 @@ async def connect_robust(
             client_properties=client_properties,
             **kwargs
         ),
-        loop=loop,
+        loop=loop, ssl_context=ssl_context
     )
 
     await connection.connect(timeout=timeout)
