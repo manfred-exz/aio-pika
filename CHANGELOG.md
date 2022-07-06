@@ -1,3 +1,8 @@
+8.0.4
+-----
+
+* allow passing ssl_context to the connection #474
+
 8.0.3
 -----
 
